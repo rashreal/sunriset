@@ -29,7 +29,14 @@ function tileKey(z, x, y) { return `${z}/${x}/${y}`; }
 
 // ── Karte initialisieren ──────────────────────────────────────────────────────
 const map = L.map('map', { zoomControl: true })
-             .setView([47.4, 11.0], 11); // Alpen als Standardansicht
+             .setView([47.4, 11.0], 11);
+
+function _updateZoomDisplay() {
+    const el = document.getElementById('zoom-level');
+    if (el) el.textContent = `Zoom ${map.getZoom()}`;
+}
+map.on('zoomend', _updateZoomDisplay);
+_updateZoomDisplay();
 
 L.tileLayer(TOPO_URL, {
     attribution: '© <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a> (CC-BY-SA) | © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
