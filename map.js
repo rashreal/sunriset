@@ -111,6 +111,7 @@ function _setMarker(lat, lng) {
 
 // ── "Bereich offline speichern" ───────────────────────────────────────────────
 document.getElementById('save-area-btn').addEventListener('click', saveArea);
+document.getElementById('save-all-btn').addEventListener('click', saveAllZooms);
 document.getElementById('clear-cache-btn').addEventListener('click', clearTileCache);
 document.getElementById('overlay-toggle').addEventListener('change', e => {
     if (e.target.checked) {
@@ -176,6 +177,65 @@ async function saveArea() {
     cacheOverlay.redraw();
     await updateCacheInfo();
     progress.textContent = `✓ ${done} Kacheln gespeichert (Zoom ${zMin}–${zMax})`;
+    btn.disabled = false;
+}
+
+/**
+ * Speichert alle Zoomstufen von 1 bis zum aktuellen Zoom
+ * für den sichtbaren Kartenausschnitt.
+ */
+async function saveAllZooms() {
+    const btn      = document.getElementById('save-all-btn');
+    const progress = document.getElementById('save-progress');
+    const bounds   = map.getBounds();
+    const zMax     = Math.min(map.getZoom(), SAVE_ZOOM_MAX);
+
+    const allTiles = [];
+    for (let zoom = 1; zoom <= zMax; zoom++) {
+        allTiles.push(..._tilesForBounds(bounds, zoom));
+    }
+    const newTiles = allTiles.filter(t => !cachedTiles.has(tileKey(t.z, t.x, t.y)));
+
+    if (newTiles.length === 0) {
+        progress.textContent = '✓ Alle Zoomstufen bereits gespeichert.';
+        return;
+    }
+    if (newTiles.length > TILE_LIMIT) {
+        const mb = (newTiles.length * 20 / 1024).toFixed(0);
+        progress.textContent =
+            `⚠ ${newTiles.length.toLocaleString('de-DE')} Kacheln (ca. ${mb} MB) – ` +
+            `bitte weiter reinzoomen (max. ${TILE_LIMIT.toLocaleString('de-DE')}).`;
+        return;
+    }
+
+    btn.disabled = true;
+    const mb = (newTiles.length * 20 / 1024).toFixed(1);
+    progress.textContent = `0 / ${newTiles.length} Kacheln (ca. ${mb} MB)…`;
+
+    let done = 0;
+    for (const { z: tz, x, y } of newTiles) {
+        const sub = TOPO_SUBS[(x + y) % TOPO_SUBS.length];
+        const url = `https://${sub}.tile.opentopomap.org/${tz}/${x}/${y}.png`;
+        try {
+            await fetch(url, { mode: 'cors' });
+            cachedTiles.add(tileKey(tz, x, y));
+        } catch (_) { /* ignorieren */ }
+
+        done++;
+        progress.textContent = `${done} / ${newTiles.length} Kacheln (ca. ${mb} MB)…`;
+
+        if (done % 25 === 0) {
+            persistTiles();
+            cacheOverlay.redraw();
+            await updateCacheInfo();
+        }
+        await _sleep(FETCH_DELAY_MS);
+    }
+
+    persistTiles();
+    cacheOverlay.redraw();
+    await updateCacheInfo();
+    progress.textContent = `✓ ${done} Kacheln gespeichert (Zoom 1–${zMax})`;
     btn.disabled = false;
 }
 
