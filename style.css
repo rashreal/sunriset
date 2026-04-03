@@ -169,7 +169,7 @@ input[type="date"] { color-scheme: dark; }
 .compare-table th:first-child { text-align: left; }
 .compare-table td {
     padding: 0.35rem 0;
-    vertical-align: middle;
+    vertical-align: top;
     text-align: right;
 }
 .compare-table td:first-child { text-align: left; }

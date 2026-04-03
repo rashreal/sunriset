@@ -35,7 +35,6 @@ gpsBtn.addEventListener('click', () => {
         pos => {
             latInput.value  = pos.coords.latitude.toFixed(5);
             lonInput.value  = pos.coords.longitude.toFixed(5);
-            // GPS-Höhe übernehmen, wenn verfügbar (kann ungenau sein)
             if (pos.coords.altitude !== null) {
                 elevInput.value = Math.round(pos.coords.altitude);
             }
@@ -88,9 +87,10 @@ function calculate() {
     polarMsg.hidden   = true;
     sunResults.hidden = false;
 
-    // ── Spaltenüberschrift ────────────────────────────────────────────────────
-    const colHeader = document.getElementById('col-header');
-    colHeader.textContent = hasElev ? `0 m / ${Math.round(elev)} m` : '';
+    // ── Spaltenüberschrift für Höhen-Spalte ───────────────────────────────────
+    const colElev = document.getElementById('col-elev');
+    colElev.hidden = !hasElev;
+    if (hasElev) colElev.textContent = `${Math.round(elev)} m (freier Horizont)`;
 
     // ── Hinweistext ───────────────────────────────────────────────────────────
     const hint = document.getElementById('elevation-hint');
@@ -112,8 +112,14 @@ function calculate() {
     // ── Dämmerung ─────────────────────────────────────────────────────────────
     const twilightRow = document.getElementById('twilight-row');
     if (sealevel.civilDawn !== null) {
-        fillTwilightCell('dawn', sealevel.civilDawn, openHorizon.civilDawn, date, hasElev);
-        fillTwilightCell('dusk', sealevel.civilDusk, openHorizon.civilDusk, date, hasElev);
+        setText('res-dawn-sl', utcMinToLocalHHMM(sealevel.civilDawn, date));
+        setText('res-dusk-sl', utcMinToLocalHHMM(sealevel.civilDusk, date));
+        if (hasElev && openHorizon.civilDawn !== null) {
+            setText('res-dawn-oh', utcMinToLocalHHMM(openHorizon.civilDawn, date));
+            setText('res-dusk-oh', utcMinToLocalHHMM(openHorizon.civilDusk, date));
+        }
+        setColVisible('cell-dawn-oh', hasElev);
+        setColVisible('cell-dusk-oh', hasElev);
         twilightRow.hidden = false;
     } else {
         twilightRow.hidden = true;
@@ -129,15 +135,8 @@ function fillRow(key, sl, oh, date, hasElev) {
     const slVal = isDuration ? fmtDuration(sl.sunset - sl.sunrise) : utcMinToLocalHHMM(sl[prop], date);
     setText(`res-${key}-sl`, slVal);
 
-    const sep = document.getElementById(`sep-${key}`);
-    if (sep) sep.hidden = !hasElev;
-
-    if (!hasElev) {
-        setText(`res-${key}-oh`, '');
-        const diffEl = document.getElementById(`diff-${key}`);
-        if (diffEl) diffEl.textContent = '';
-        return;
-    }
+    setColVisible(`cell-${key}-oh`, hasElev);
+    if (!hasElev) return;
 
     const ohVal = isDuration ? fmtDuration(oh.sunset - oh.sunrise) : utcMinToLocalHHMM(oh[prop], date);
     setText(`res-${key}-oh`, ohVal);
@@ -148,17 +147,6 @@ function fillRow(key, sl, oh, date, hasElev) {
         ? (oh.sunset - oh.sunrise) - (sl.sunset - sl.sunrise)
         : oh[prop] - sl[prop];
     diffEl.textContent = fmtDiff(diffMin);
-}
-
-function fillTwilightCell(key, slMin, ohMin, date, hasElev) {
-    setText(`res-${key}-sl`, utcMinToLocalHHMM(slMin, date));
-    const sep = document.getElementById(`sep-${key}`);
-    if (sep) sep.hidden = !hasElev;
-    if (hasElev && ohMin !== null) {
-        setText(`res-${key}-oh`, utcMinToLocalHHMM(ohMin, date));
-    } else {
-        setText(`res-${key}-oh`, '');
-    }
 }
 
 // ── Tageslicht-Balken ─────────────────────────────────────────────────────────
@@ -195,7 +183,10 @@ function setText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
 }
-
+function setColVisible(id, visible) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = !visible;
+}
 function showError(msg) {
     errorBox.textContent = msg;
     errorBox.hidden = false;
