@@ -44,22 +44,8 @@ L.tileLayer(TOPO_URL, {
     subdomains: TOPO_SUBS,
 }).addTo(map);
 
-// Jede geladene Kachel in localStorage registrieren und Overlay aktualisieren
-map.eachLayer(layer => {
-    if (layer instanceof L.TileLayer) {
-        layer.on('tileload', e => {
-            const key = tileKey(e.coords.z, e.coords.x, e.coords.y);
-            if (!cachedTiles.has(key)) {
-                cachedTiles.add(key);
-                persistTiles();
-                cacheOverlay.redraw();
-            }
-        });
-    }
-});
-
 // ── Cache-Overlay ─────────────────────────────────────────────────────────────
-// Zeichnet ein grünes Rechteck über jede Kachel, die bereits gecacht ist.
+// Zeichnet eine Schraffur über Kacheln, die explizit gespeichert wurden.
 const CacheOverlay = L.GridLayer.extend({
     createTile(coords) {
         const div = L.DomUtil.create('div', '');
@@ -71,20 +57,6 @@ const CacheOverlay = L.GridLayer.extend({
 });
 const cacheOverlay = new CacheOverlay({ zIndex: 400 });
 cacheOverlay.addTo(map);
-
-// tileload-Listener auf alle TileLayer setzen (auch nach addTo)
-map.on('layeradd', e => {
-    if (e.layer instanceof L.TileLayer) {
-        e.layer.on('tileload', ev => {
-            const key = tileKey(ev.coords.z, ev.coords.x, ev.coords.y);
-            if (!cachedTiles.has(key)) {
-                cachedTiles.add(key);
-                persistTiles();
-                cacheOverlay.redraw();
-            }
-        });
-    }
-});
 
 // ── Marker bei Klick auf Karte ────────────────────────────────────────────────
 let _marker = null;
