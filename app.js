@@ -141,10 +141,12 @@ function calculate() {
  */
 function fillRow(key, sl, oh, date, hasElev, lowerIsBetter) {
     const isDuration = key === 'daylength';
+    // 'noon' is stored as 'solarNoon' in the result object
+    const prop = key === 'noon' ? 'solarNoon' : key;
 
     const slVal = isDuration
         ? fmtDuration(sl.sunset - sl.sunrise)
-        : utcMinToLocalHHMM(sl[key === 'daylength' ? 'sunrise' : key], date);
+        : utcMinToLocalHHMM(sl[prop], date);
 
     setText(`res-${key}-sl`, slVal);
 
@@ -155,7 +157,7 @@ function fillRow(key, sl, oh, date, hasElev, lowerIsBetter) {
 
     const ohVal = isDuration
         ? fmtDuration(oh.sunset - oh.sunrise)
-        : utcMinToLocalHHMM(oh[key === 'daylength' ? 'sunrise' : key], date);
+        : utcMinToLocalHHMM(oh[prop], date);
 
     setText(`res-${key}-oh`, ohVal);
 
