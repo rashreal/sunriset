@@ -80,6 +80,7 @@ label {
 input[type="number"],
 input[type="date"] {
     width: 100%;
+    height: 2.8rem;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -168,7 +169,7 @@ input[type="date"] { color-scheme: dark; }
 }
 .compare-table th:first-child { text-align: left; }
 .compare-table td {
-    padding: 0.35rem 0;
+    padding: 0.2rem 0;
     vertical-align: top;
     text-align: right;
 }
@@ -199,7 +200,7 @@ input[type="date"] { color-scheme: dark; }
 .divider {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 0.75rem 0;
+    margin: 0.4rem 0;
 }
 
 #polar-msg {
