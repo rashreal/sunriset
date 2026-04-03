@@ -115,6 +115,7 @@ input[type="date"] {
     cursor: pointer;
     transition: border-color 0.15s, opacity 0.15s;
     flex-shrink: 0;
+    align-self: flex-end;
     line-height: 1;
 }
 #gps-btn:hover { border-color: var(--accent); }
