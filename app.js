@@ -33,11 +33,15 @@ gpsBtn.addEventListener('click', () => {
 
     navigator.geolocation.getCurrentPosition(
         pos => {
-            latInput.value  = pos.coords.latitude.toFixed(5);
-            lonInput.value  = pos.coords.longitude.toFixed(5);
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            latInput.value  = lat.toFixed(5);
+            lonInput.value  = lng.toFixed(5);
             if (pos.coords.altitude !== null) {
                 elevInput.value = Math.round(pos.coords.altitude);
             }
+            // Marker auf der Karte setzen (map.js)
+            if (typeof setMapMarker === 'function') setMapMarker(lat, lng);
             gpsBtn.classList.remove('loading');
             gpsBtn.disabled = false;
             calculate();
