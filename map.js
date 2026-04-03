@@ -67,6 +67,12 @@ map.on('click', e => {
     _setMarker(lat, lng);
     document.getElementById('lat').value = lat.toFixed(5);
     document.getElementById('lon').value = lng.toFixed(5);
+    // Höhe aus Terrain-Kachel auslesen
+    const elevInput = document.getElementById('elevation');
+    elevInput.value = '…';
+    fetchElevation(lat, lng)
+        .then(h => { elevInput.value = h; })
+        .catch(() => { elevInput.value = ''; });
 });
 
 /**
@@ -278,6 +284,40 @@ function _latLngToTile(lat, lng, z) {
         (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n
     );
     return { x: Math.max(0, Math.min(n - 1, x)), y: Math.max(0, Math.min(n - 1, y)) };
+}
+
+/**
+ * Liest die Geländehöhe für einen Punkt aus AWS Terrarium-Höhenkacheln.
+ * Kachelformat: jeder Pixel kodiert Höhe als (R×256 + G + B/256) − 32768.
+ * Zoom 10 → ~150 m Auflösung, ausreichend für unsere Sonnenberechnung.
+ * Funktioniert offline wenn die Kachel bereits gecacht ist.
+ */
+async function fetchElevation(lat, lng) {
+    const Z    = 10;
+    const tile = _latLngToTile(lat, lng, Z);
+    const url  = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Z}/${tile.x}/${tile.y}.png`;
+
+    // Pixelposition innerhalb der Kachel berechnen
+    const n      = Math.pow(2, Z);
+    const px     = Math.floor(((lng + 180) / 360 * n - tile.x) * 256);
+    const latRad = lat * Math.PI / 180;
+    const mercY  = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2;
+    const py     = Math.floor((mercY * n - tile.y) * 256);
+
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width  = 256;
+            canvas.height = 256;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const [r, g, b] = canvas.getContext('2d').getImageData(px, py, 1, 1).data;
+            resolve(Math.round(r * 256 + g + b / 256 - 32768));
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
 }
 
 /** Gibt alle Kachelkoordinaten innerhalb eines Bounds-Objekts zurück */
