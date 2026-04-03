@@ -111,7 +111,7 @@ async function saveArea() {
     const z        = map.getZoom();
 
     const zMin = Math.max(SAVE_ZOOM_MIN, z - 2);
-    const zMax = Math.min(SAVE_ZOOM_MAX, z + 1);
+    const zMax = Math.min(SAVE_ZOOM_MAX, z + 2);
 
     const allTiles  = [];
     for (let zoom = zMin; zoom <= zMax; zoom++) {
