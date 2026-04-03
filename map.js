@@ -111,6 +111,10 @@ function _setMarker(lat, lng) {
 
 // ── "Bereich offline speichern" ───────────────────────────────────────────────
 document.getElementById('save-area-btn').addEventListener('click', saveArea);
+document.getElementById('clear-cache-btn').addEventListener('click', clearTileCache);
+
+// Speicherinfo beim Start laden
+updateCacheInfo();
 
 async function saveArea() {
     const btn      = document.getElementById('save-area-btn');
@@ -118,11 +122,9 @@ async function saveArea() {
     const bounds   = map.getBounds();
     const z        = map.getZoom();
 
-    // Zoom-Bereich: aktueller Zoom ±2, innerhalb der globalen Grenzen
     const zMin = Math.max(SAVE_ZOOM_MIN, z - 2);
     const zMax = Math.min(SAVE_ZOOM_MAX, z + 1);
 
-    // Alle Kacheln berechnen, die noch nicht gecacht sind
     const allTiles  = [];
     for (let zoom = zMin; zoom <= zMax; zoom++) {
         allTiles.push(..._tilesForBounds(bounds, zoom));
@@ -158,14 +160,62 @@ async function saveArea() {
         if (done % 25 === 0) {
             persistTiles();
             cacheOverlay.redraw();
+            await updateCacheInfo();
         }
         await _sleep(FETCH_DELAY_MS);
     }
 
     persistTiles();
     cacheOverlay.redraw();
-    progress.textContent =
-        `✓ ${done} Kacheln gespeichert (Zoom ${zMin}–${zMax})`;
+    await updateCacheInfo();
+    progress.textContent = `✓ ${done} Kacheln gespeichert (Zoom ${zMin}–${zMax})`;
+    btn.disabled = false;
+}
+
+// ── Cache-Verwaltung ──────────────────────────────────────────────────────────
+
+/**
+ * Liest die tatsächliche Kachelanzahl aus dem Service-Worker-Cache
+ * und zeigt eine Schätzung des Speicherverbrauchs an.
+ * Durchschnittliche Kachelgröße OpenTopoMap: ~20 KB.
+ */
+async function updateCacheInfo() {
+    const infoEl = document.getElementById('cache-info');
+    if (!('caches' in window)) {
+        infoEl.textContent = '';
+        return;
+    }
+    try {
+        const cache = await caches.open('sunriset-tiles-v1');
+        const keys  = await cache.keys();
+        const count = keys.length;
+        if (count === 0) {
+            infoEl.textContent = 'Kein Karten-Cache';
+        } else {
+            const mb = (count * 20 / 1024).toFixed(1);
+            infoEl.textContent = `${count.toLocaleString('de-DE')} Kacheln · ca. ${mb} MB`;
+        }
+    } catch (_) {
+        infoEl.textContent = '';
+    }
+}
+
+/** Löscht den gesamten Karten-Cache und setzt das Overlay zurück. */
+async function clearTileCache() {
+    const btn    = document.getElementById('clear-cache-btn');
+    const info   = document.getElementById('cache-info');
+    btn.disabled = true;
+    info.textContent = 'Wird gelöscht…';
+
+    try {
+        await caches.delete('sunriset-tiles-v1');
+    } catch (_) { /* ignorieren */ }
+
+    cachedTiles.clear();
+    localStorage.removeItem(TILE_KEY);
+    cacheOverlay.redraw();
+    document.getElementById('save-progress').textContent = '';
+    await updateCacheInfo();
     btn.disabled = false;
 }
 

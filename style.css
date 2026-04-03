@@ -281,7 +281,8 @@ input[type="date"] { color-scheme: dark; }
     flex-wrap: wrap;
 }
 
-#save-area-btn {
+#save-area-btn,
+#clear-cache-btn {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -292,11 +293,22 @@ input[type="date"] { color-scheme: dark; }
     white-space: nowrap;
     transition: border-color 0.15s;
 }
-#save-area-btn:hover  { border-color: var(--accent); }
-#save-area-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#save-area-btn:hover   { border-color: var(--accent); }
+#clear-cache-btn:hover { border-color: var(--danger); }
+#save-area-btn:disabled,
+#clear-cache-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 #save-progress {
     font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.cache-info-row {
+    margin-top: 0.4rem;
+}
+#cache-info {
+    font-size: 0.75rem;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
 }
