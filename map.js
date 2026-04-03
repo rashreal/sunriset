@@ -96,8 +96,11 @@ function _setMarker(lat, lng) {
 }
 
 // ── "Bereich offline speichern" ───────────────────────────────────────────────
+let _cancelSave = false;
+
 document.getElementById('save-area-btn').addEventListener('click', saveArea);
 document.getElementById('save-all-btn').addEventListener('click', saveAllZooms);
+document.getElementById('cancel-save-btn').addEventListener('click', () => { _cancelSave = true; });
 document.getElementById('clear-cache-btn').addEventListener('click', clearTileCache);
 document.getElementById('overlay-toggle').addEventListener('change', e => {
     if (e.target.checked) {
@@ -194,12 +197,16 @@ async function saveAllZooms() {
         return;
     }
 
+    _cancelSave = false;
     btn.disabled = true;
+    document.getElementById('cancel-save-btn').hidden = false;
     const mb = (newTiles.length * 20 / 1024).toFixed(1);
     progress.textContent = `0 / ${newTiles.length} Kacheln (ca. ${mb} MB)…`;
 
     let done = 0;
     for (const { z: tz, x, y } of newTiles) {
+        if (_cancelSave) break;
+
         const sub = TOPO_SUBS[(x + y) % TOPO_SUBS.length];
         const url = `https://${sub}.tile.opentopomap.org/${tz}/${x}/${y}.png`;
         try {
@@ -221,7 +228,10 @@ async function saveAllZooms() {
     persistTiles();
     cacheOverlay.redraw();
     await updateCacheInfo();
-    progress.textContent = `✓ ${done} Kacheln gespeichert (Zoom 1–${zMax})`;
+    document.getElementById('cancel-save-btn').hidden = true;
+    progress.textContent = _cancelSave
+        ? `⏹ Abgebrochen nach ${done} Kacheln.`
+        : `✓ ${done} Kacheln gespeichert (Zoom 1–${zMax})`;
     btn.disabled = false;
 }
 

@@ -287,6 +287,7 @@ input[type="date"] { color-scheme: dark; }
 
 #save-area-btn,
 #save-all-btn,
+#cancel-save-btn,
 #clear-cache-btn {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -299,8 +300,9 @@ input[type="date"] { color-scheme: dark; }
     transition: border-color 0.15s;
 }
 #save-area-btn:hover,
-#save-all-btn:hover    { border-color: var(--accent); }
-#clear-cache-btn:hover { border-color: var(--danger); }
+#save-all-btn:hover     { border-color: var(--accent); }
+#cancel-save-btn:hover,
+#clear-cache-btn:hover  { border-color: var(--danger); }
 #save-area-btn:disabled,
 #save-all-btn:disabled,
 #clear-cache-btn:disabled { opacity: 0.5; cursor: not-allowed; }
