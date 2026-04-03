@@ -7,7 +7,7 @@ const TILE_KEY       = 'sunriset-cached-tiles-v1';
 const FETCH_DELAY_MS = 40;   // ms zwischen Tile-Requests (Serverbelastung begrenzen)
 const TILE_LIMIT     = 1500; // Warnung wenn mehr als diese Anzahl zu laden wäre
 const SAVE_ZOOM_MIN  = 8;    // absolutes Minimum beim Speichern
-const SAVE_ZOOM_MAX  = 15;   // absolutes Maximum beim Speichern
+const SAVE_ZOOM_MAX  = 17;   // absolutes Maximum beim Speichern
 
 // ── Gecachte Kacheln persistent verwalten ─────────────────────────────────────
 // Wir tracken in localStorage welche Kacheln (z/x/y) bereits geladen wurden,
