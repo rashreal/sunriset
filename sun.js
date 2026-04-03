@@ -124,11 +124,11 @@ function utcMinToLocalHHMM(minutes, date) {
     return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
-/** Format a duration in minutes as "X h YY min" */
+/** Format a duration in minutes as "13h02m" */
 function fmtDuration(minutes) {
     const h = Math.floor(minutes / 60);
     const m = Math.round(minutes % 60);
-    return `${h} h ${m.toString().padStart(2, '0')} min`;
+    return `${h}h${m.toString().padStart(2, '0')}m`;
 }
 
 /** Format a signed minute difference as e.g. "−3 min" or "+3 min" */
