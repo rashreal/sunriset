@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE      = 'sunriset-v4.8';
+const CACHE      = 'sunriset-v4.9';
 const TILE_CACHE = 'sunriset-tiles-v1';
 
 const ASSETS = [

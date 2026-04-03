@@ -64,7 +64,7 @@ header p {
 .input-row {
     display: flex;
     gap: 0.5rem;
-    align-items: flex-end;
+    align-items: stretch;
     margin-bottom: 0.75rem;
 }
 .input-group {
@@ -72,6 +72,9 @@ header p {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+}
+.input-group input {
+    flex: 1;
 }
 label {
     font-size: 0.8rem;
@@ -91,6 +94,9 @@ input[type="date"] {
     /* Remove spinner arrows */
     -moz-appearance: textfield;
 }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input:focus { border-color: var(--accent); }
 
 /* iOS date input fix */
 input[type="date"] {
