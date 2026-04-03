@@ -1,0 +1,11 @@
+{
+    "name": "Sunriset – Sonnenzeiten",
+    "short_name": "Sunriset",
+    "description": "Sonnenaufgang und Sonnenuntergang offline berechnen.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0f0e17",
+    "theme_color": "#0f0e17",
+    "lang": "de",
+    "icons": []
+}

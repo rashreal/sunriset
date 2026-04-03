@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sunriset</title>
+    <meta name="description" content="Sonnenaufgang und Sonnenuntergang offline berechnen – für jeden Ort, ohne Internet." />
+
+    <!-- PWA / iPhone -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0f0e17" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Sunriset" />
+
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+<header>
+    <h1>🌄 Sunriset</h1>
+    <p>Sonnenzeiten offline berechnen</p>
+</header>
+
+<!-- Eingabe -->
+<div class="card">
+    <h2>Standort &amp; Datum</h2>
+    <form id="location-form" novalidate>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label for="lat">Breitengrad (°N)</label>
+                <input id="lat" type="number" step="any" min="-90" max="90"
+                       placeholder="z.B. 47.421" inputmode="decimal" />
+            </div>
+            <div class="input-group">
+                <label for="lon">Längengrad (°E)</label>
+                <input id="lon" type="number" step="any" min="-180" max="180"
+                       placeholder="z.B. 10.985" inputmode="decimal" />
+            </div>
+            <!-- GPS-Button -->
+            <button type="button" id="gps-btn" title="Aktuellen Standort verwenden"
+                    aria-label="GPS-Standort">📍</button>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0.75rem;">
+            <label for="date">Datum</label>
+            <input id="date" type="date" />
+        </div>
+
+        <button type="submit" class="calc-btn">Berechnen</button>
+    </form>
+</div>
+
+<!-- Fehlermeldung -->
+<div id="error-msg" hidden role="alert"></div>
+
+<!-- Ergebnisse -->
+<div id="results" hidden>
+
+    <div id="polar-msg" hidden></div>
+
+    <div id="sun-results" class="card">
+        <h2>Ergebnis</h2>
+
+        <div class="result-grid">
+            <div class="result-item">
+                <span class="label">🌅 Sonnenaufgang</span>
+                <span class="value accent" id="res-sunrise">–</span>
+            </div>
+            <div class="result-item">
+                <span class="label">🌇 Sonnenuntergang</span>
+                <span class="value accent" id="res-sunset">–</span>
+            </div>
+            <div class="result-item">
+                <span class="label">☀️ Sonnenhöchststand</span>
+                <span class="value small" id="res-noon">–</span>
+            </div>
+            <div class="result-item">
+                <span class="label">⏱ Tageslänge</span>
+                <span class="value small" id="res-daylength">–</span>
+            </div>
+        </div>
+
+        <!-- Bürgerliche Dämmerung (wird ausgeblendet bei Polartag/-nacht) -->
+        <div id="twilight-row" hidden>
+            <hr class="divider" />
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="label">🌆 Morgengrauen</span>
+                    <span class="value small" id="res-dawn">–</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">🌃 Abenddämmerung</span>
+                    <span class="value small" id="res-dusk">–</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tageslicht-Balken -->
+        <hr class="divider" />
+        <div id="timeline-wrap" hidden>
+            <div style="position: relative;">
+                <span id="now-label"></span>
+                <div id="now-line"></div>
+                <div id="timeline"></div>
+            </div>
+            <div class="timeline-labels">
+                <span>0:00</span><span>6:00</span><span>12:00</span>
+                <span>18:00</span><span>24:00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    Alle Berechnungen erfolgen lokal auf dem Gerät – kein Internet benötigt.
+</footer>
+
+<script src="./sun.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+/* ── Reset & Basis ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:        #0f0e17;
+    --surface:   #1e1e2e;
+    --border:    #2e2e4e;
+    --text:      #fffffe;
+    --muted:     #a7a9be;
+    --accent:    #f4a261;
+    --accent2:   #f4d03f;
+    --danger:    #e06c75;
+    --radius:    12px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100dvh;
+    padding: 1.5rem 1rem 3rem;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+header p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+/* ── Karte ────────────────────────────────────────────────────────────────── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+.card h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+/* ── Formular ─────────────────────────────────────────────────────────────── */
+.input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-bottom: 0.75rem;
+}
+.input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+label {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+    /* Remove spinner arrows */
+    -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input:focus { border-color: var(--accent); }
+
+/* iOS date input fix */
+input[type="date"] { color-scheme: dark; }
+
+#gps-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.3rem;
+    padding: 0.55rem 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s, opacity 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+#gps-btn:hover { border-color: var(--accent); }
+#gps-btn.loading { opacity: 0.5; }
+#gps-btn:disabled { cursor: not-allowed; }
+
+.calc-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #e07b3a);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem;
+    cursor: pointer;
+    margin-top: 0.25rem;
+    transition: opacity 0.15s;
+}
+.calc-btn:hover { opacity: 0.9; }
+
+/* ── Fehlermeldung ───────────────────────────────────────────────────────── */
+#error-msg {
+    background: #2a1515;
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    color: var(--danger);
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ── Ergebnisse ───────────────────────────────────────────────────────────── */
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+.result-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.result-item .label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+.result-item .value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+.result-item .value.accent { color: var(--accent); }
+.result-item .value.small  { font-size: 1.1rem; padding-top: 0.25rem; }
+
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.75rem 0;
+}
+
+#polar-msg {
+    color: var(--accent2);
+    font-size: 1rem;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+/* ── Tageslicht-Balken ────────────────────────────────────────────────────── */
+#timeline-wrap {
+    position: relative;
+    margin-top: 0.25rem;
+}
+#timeline {
+    width: 100%;
+    height: 28px;
+    border-radius: 6px;
+    position: relative;
+}
+#now-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+#now-label {
+    position: absolute;
+    top: -1.4rem;
+    font-size: 0.7rem;
+    color: var(--muted);
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+.timeline-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    padding: 0 1px;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 2rem;
+}
