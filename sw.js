@@ -2,7 +2,7 @@
 
 // Service Worker – cached alle App-Dateien für Offline-Betrieb.
 // Version hochzählen, um den Cache bei Updates zu leeren.
-const CACHE = 'sunriset-v1';
+const CACHE = 'sunriset-v2';
 
 const ASSETS = [
     './',
