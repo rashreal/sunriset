@@ -112,6 +112,13 @@ function _setMarker(lat, lng) {
 // ── "Bereich offline speichern" ───────────────────────────────────────────────
 document.getElementById('save-area-btn').addEventListener('click', saveArea);
 document.getElementById('clear-cache-btn').addEventListener('click', clearTileCache);
+document.getElementById('overlay-toggle').addEventListener('change', e => {
+    if (e.target.checked) {
+        cacheOverlay.addTo(map);
+    } else {
+        cacheOverlay.remove();
+    }
+});
 
 // Speicherinfo beim Start laden
 updateCacheInfo();
