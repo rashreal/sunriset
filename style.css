@@ -231,7 +231,7 @@ input[type="date"] { color-scheme: dark; }
 }
 #now-label {
     position: absolute;
-    top: -1.4rem;
+    top: 0;
     font-size: 0.7rem;
     color: var(--muted);
     transform: translateX(-50%);
