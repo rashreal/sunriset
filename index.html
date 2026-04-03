@@ -77,30 +77,36 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>0 m ü. NN</th>
-                    <th id="col-elev" hidden></th>
+                    <th id="col-header"></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td class="row-label">🌅 Aufgang</td>
-                    <td><span class="val accent" id="res-sunrise-sl">–</span></td>
-                    <td id="cell-sunrise-oh" hidden><span class="val accent" id="res-sunrise-oh">–</span><span class="diff" id="diff-sunrise"></span></td>
+                    <td>
+                        <span class="val accent"><span id="res-sunrise-sl">–</span><span class="sep" id="sep-sunrise" hidden> / </span><span id="res-sunrise-oh"></span></span>
+                        <span class="diff" id="diff-sunrise"></span>
+                    </td>
                 </tr>
                 <tr>
                     <td class="row-label">🌇 Untergang</td>
-                    <td><span class="val accent" id="res-sunset-sl">–</span></td>
-                    <td id="cell-sunset-oh" hidden><span class="val accent" id="res-sunset-oh">–</span><span class="diff" id="diff-sunset"></span></td>
+                    <td>
+                        <span class="val accent"><span id="res-sunset-sl">–</span><span class="sep" id="sep-sunset" hidden> / </span><span id="res-sunset-oh"></span></span>
+                        <span class="diff" id="diff-sunset"></span>
+                    </td>
                 </tr>
                 <tr>
                     <td class="row-label">☀️ Mittagsstand</td>
-                    <td><span class="val" id="res-noon-sl">–</span></td>
-                    <td id="cell-noon-oh" hidden><span class="val" id="res-noon-oh">–</span></td>
+                    <td>
+                        <span class="val"><span id="res-noon-sl">–</span><span class="sep" id="sep-noon" hidden> / </span><span id="res-noon-oh"></span></span>
+                    </td>
                 </tr>
                 <tr>
                     <td class="row-label">⏱ Tageslänge</td>
-                    <td><span class="val" id="res-daylength-sl">–</span></td>
-                    <td id="cell-daylength-oh" hidden><span class="val" id="res-daylength-oh">–</span><span class="diff" id="diff-daylength"></span></td>
+                    <td>
+                        <span class="val"><span id="res-daylength-sl">–</span><span class="sep" id="sep-daylength" hidden> / </span><span id="res-daylength-oh"></span></span>
+                        <span class="diff" id="diff-daylength"></span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -112,13 +118,15 @@
                 <tbody>
                     <tr>
                         <td class="row-label">🌆 Morgengrauen</td>
-                        <td><span class="val" id="res-dawn-sl">–</span></td>
-                        <td id="cell-dawn-oh" hidden><span class="val" id="res-dawn-oh">–</span></td>
+                        <td>
+                            <span class="val"><span id="res-dawn-sl">–</span><span class="sep" id="sep-dawn" hidden> / </span><span id="res-dawn-oh"></span></span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="row-label">🌃 Abenddämmerung</td>
-                        <td><span class="val" id="res-dusk-sl">–</span></td>
-                        <td id="cell-dusk-oh" hidden><span class="val" id="res-dusk-oh">–</span></td>
+                        <td>
+                            <span class="val"><span id="res-dusk-sl">–</span><span class="sep" id="sep-dusk" hidden> / </span><span id="res-dusk-oh"></span></span>
+                        </td>
                     </tr>
                 </tbody>
             </table>
