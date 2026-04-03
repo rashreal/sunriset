@@ -38,14 +38,20 @@
                 <input id="lon" type="number" step="any" min="-180" max="180"
                        placeholder="z.B. 10.985" inputmode="decimal" />
             </div>
-            <!-- GPS-Button -->
             <button type="button" id="gps-btn" title="Aktuellen Standort verwenden"
                     aria-label="GPS-Standort">📍</button>
         </div>
 
-        <div class="input-group" style="margin-bottom: 0.75rem;">
-            <label for="date">Datum</label>
-            <input id="date" type="date" />
+        <div class="input-row">
+            <div class="input-group">
+                <label for="elevation">Höhe (m ü. NN)</label>
+                <input id="elevation" type="number" step="1" min="0" max="8849"
+                       placeholder="z.B. 2962" inputmode="numeric" />
+            </div>
+            <div class="input-group">
+                <label for="date">Datum</label>
+                <input id="date" type="date" />
+            </div>
         </div>
 
         <button type="submit" class="calc-btn">Berechnen</button>
@@ -63,38 +69,59 @@
     <div id="sun-results" class="card">
         <h2>Ergebnis</h2>
 
-        <div class="result-grid">
-            <div class="result-item">
-                <span class="label">🌅 Sonnenaufgang</span>
-                <span class="value accent" id="res-sunrise">–</span>
-            </div>
-            <div class="result-item">
-                <span class="label">🌇 Sonnenuntergang</span>
-                <span class="value accent" id="res-sunset">–</span>
-            </div>
-            <div class="result-item">
-                <span class="label">☀️ Sonnenhöchststand</span>
-                <span class="value small" id="res-noon">–</span>
-            </div>
-            <div class="result-item">
-                <span class="label">⏱ Tageslänge</span>
-                <span class="value small" id="res-daylength">–</span>
-            </div>
-        </div>
+        <!-- Vergleichshinweis (nur bei Höheneingabe sichtbar) -->
+        <p id="elevation-hint" class="hint" hidden></p>
 
-        <!-- Bürgerliche Dämmerung (wird ausgeblendet bei Polartag/-nacht) -->
+        <!-- Vergleichstabelle -->
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>0 m ü. NN</th>
+                    <th id="col-elev" hidden></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="row-label">🌅 Aufgang</td>
+                    <td><span class="val accent" id="res-sunrise-sl">–</span></td>
+                    <td id="cell-sunrise-oh" hidden><span class="val accent" id="res-sunrise-oh">–</span><span class="diff" id="diff-sunrise"></span></td>
+                </tr>
+                <tr>
+                    <td class="row-label">🌇 Untergang</td>
+                    <td><span class="val accent" id="res-sunset-sl">–</span></td>
+                    <td id="cell-sunset-oh" hidden><span class="val accent" id="res-sunset-oh">–</span><span class="diff" id="diff-sunset"></span></td>
+                </tr>
+                <tr>
+                    <td class="row-label">☀️ Mittagsstand</td>
+                    <td><span class="val" id="res-noon-sl">–</span></td>
+                    <td id="cell-noon-oh" hidden><span class="val" id="res-noon-oh">–</span></td>
+                </tr>
+                <tr>
+                    <td class="row-label">⏱ Tageslänge</td>
+                    <td><span class="val" id="res-daylength-sl">–</span></td>
+                    <td id="cell-daylength-oh" hidden><span class="val" id="res-daylength-oh">–</span><span class="diff" id="diff-daylength"></span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Bürgerliche Dämmerung -->
         <div id="twilight-row" hidden>
             <hr class="divider" />
-            <div class="result-grid">
-                <div class="result-item">
-                    <span class="label">🌆 Morgengrauen</span>
-                    <span class="value small" id="res-dawn">–</span>
-                </div>
-                <div class="result-item">
-                    <span class="label">🌃 Abenddämmerung</span>
-                    <span class="value small" id="res-dusk">–</span>
-                </div>
-            </div>
+            <table class="compare-table">
+                <tbody>
+                    <tr>
+                        <td class="row-label">🌆 Morgengrauen</td>
+                        <td><span class="val" id="res-dawn-sl">–</span></td>
+                        <td id="cell-dawn-oh" hidden><span class="val" id="res-dawn-oh">–</span></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">🌃 Abenddämmerung</td>
+                        <td><span class="val" id="res-dusk-sl">–</span></td>
+                        <td id="cell-dusk-oh" hidden><span class="val" id="res-dusk-oh">–</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Tageslicht-Balken -->

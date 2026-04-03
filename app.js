@@ -8,15 +8,16 @@ if ('serviceWorker' in navigator) {
 }
 
 // ── DOM-Elemente ──────────────────────────────────────────────────────────────
-const form       = document.getElementById('location-form');
-const latInput   = document.getElementById('lat');
-const lonInput   = document.getElementById('lon');
-const dateInput  = document.getElementById('date');
-const gpsBtn     = document.getElementById('gps-btn');
-const errorBox   = document.getElementById('error-msg');
-const results    = document.getElementById('results');
-const polarMsg   = document.getElementById('polar-msg');
-const sunResults = document.getElementById('sun-results');
+const form          = document.getElementById('location-form');
+const latInput      = document.getElementById('lat');
+const lonInput      = document.getElementById('lon');
+const elevInput     = document.getElementById('elevation');
+const dateInput     = document.getElementById('date');
+const gpsBtn        = document.getElementById('gps-btn');
+const errorBox      = document.getElementById('error-msg');
+const results       = document.getElementById('results');
+const polarMsg      = document.getElementById('polar-msg');
+const sunResults    = document.getElementById('sun-results');
 
 // ── Standardwerte ─────────────────────────────────────────────────────────────
 dateInput.value = new Date().toISOString().slice(0, 10);
@@ -32,8 +33,12 @@ gpsBtn.addEventListener('click', () => {
 
     navigator.geolocation.getCurrentPosition(
         pos => {
-            latInput.value = pos.coords.latitude.toFixed(5);
-            lonInput.value = pos.coords.longitude.toFixed(5);
+            latInput.value  = pos.coords.latitude.toFixed(5);
+            lonInput.value  = pos.coords.longitude.toFixed(5);
+            // GPS-Höhe übernehmen, wenn verfügbar (kann ungenau sein)
+            if (pos.coords.altitude !== null) {
+                elevInput.value = Math.round(pos.coords.altitude);
+            }
             gpsBtn.classList.remove('loading');
             gpsBtn.disabled = false;
             calculate();
@@ -43,7 +48,7 @@ gpsBtn.addEventListener('click', () => {
             gpsBtn.classList.remove('loading');
             gpsBtn.disabled = false;
         },
-        { timeout: 10000 }
+        { timeout: 10000, enableHighAccuracy: true }
     );
 });
 
@@ -55,88 +60,140 @@ form.addEventListener('submit', e => {
 
 // ── Berechnung ────────────────────────────────────────────────────────────────
 function calculate() {
-    const lat  = parseFloat(latInput.value);
-    const lon  = parseFloat(lonInput.value);
-    const dateStr = dateInput.value;
+    const lat      = parseFloat(latInput.value);
+    const lon      = parseFloat(lonInput.value);
+    const elevRaw  = elevInput.value.trim();
+    const elev     = elevRaw === '' ? 0 : parseFloat(elevRaw);
+    const dateStr  = dateInput.value;
 
     if (!dateStr || isNaN(lat) || isNaN(lon)) {
         showError('Bitte Breitengrad, Längengrad und Datum eingeben.');
         return;
     }
-    if (lat < -90 || lat > 90) {
-        showError('Breitengrad muss zwischen -90 und 90 liegen.');
-        return;
-    }
-    if (lon < -180 || lon > 180) {
-        showError('Längengrad muss zwischen -180 und 180 liegen.');
-        return;
-    }
+    if (lat < -90 || lat > 90)   { showError('Breitengrad muss zwischen -90 und 90 liegen.');   return; }
+    if (lon < -180 || lon > 180) { showError('Längengrad muss zwischen -180 und 180 liegen.');  return; }
+    if (isNaN(elev) || elev < 0) { showError('Höhe muss eine positive Zahl sein (oder leer lassen für 0 m).'); return; }
 
     clearError();
 
-    // Mittag UTC verwenden, um Datumsrandprobleme zu vermeiden
-    const date = new Date(dateStr + 'T12:00:00Z');
-    const res  = calcSunTimes(lat, lon, date);
+    const date    = new Date(dateStr + 'T12:00:00Z');
+    const { sealevel, openHorizon, dipDeg } = calcSunTimes(lat, lon, date, elev);
+    const hasElev = elev > 0;
 
     results.hidden = false;
 
-    if (res.type === 'polarNight') {
-        showPolarMsg('🌑 Polarnacht – die Sonne geht an diesem Tag nicht auf.');
-        return;
-    }
-    if (res.type === 'polarDay') {
-        showPolarMsg('☀️ Polartag – die Sonne geht an diesem Tag nicht unter.');
-        return;
-    }
+    if (sealevel.type === 'polarNight') { showPolarMsg('🌑 Polarnacht – die Sonne geht an diesem Tag nicht auf.'); return; }
+    if (sealevel.type === 'polarDay')   { showPolarMsg('☀️ Polartag – die Sonne geht an diesem Tag nicht unter.'); return; }
 
-    // Ergebnisse anzeigen
-    polarMsg.hidden  = true;
+    polarMsg.hidden   = true;
     sunResults.hidden = false;
 
-    setText('res-sunrise',   utcMinToLocalHHMM(res.sunrise,   date));
-    setText('res-sunset',    utcMinToLocalHHMM(res.sunset,    date));
-    setText('res-noon',      utcMinToLocalHHMM(res.solarNoon, date));
-    setText('res-daylength', fmtDuration(res.sunset - res.sunrise));
+    // ── Spaltenüberschrift für Höhen-Spalte ───────────────────────────────────
+    const colElev = document.getElementById('col-elev');
+    colElev.hidden = !hasElev;
+    if (hasElev) colElev.textContent = `${Math.round(elev)} m (freier Horizont)`;
 
+    // ── Hinweistext ───────────────────────────────────────────────────────────
+    const hint = document.getElementById('elevation-hint');
+    if (hasElev) {
+        hint.textContent =
+            `Horizontabsenkung durch Höhe: ${dipDeg.toFixed(2)}°. ` +
+            `Der tatsächliche Wert liegt zwischen den beiden Spalten – ` +
+            `je nachdem wie weit die umliegenden Berge den Horizont anheben.`;
+        hint.hidden = false;
+    } else {
+        hint.hidden = true;
+    }
+
+    // ── Werte eintragen ───────────────────────────────────────────────────────
+    fillRow('sunrise',   sealevel, openHorizon, date, hasElev, /* früherer Aufgang = negativ gut */ true);
+    fillRow('sunset',    sealevel, openHorizon, date, hasElev, false);
+    fillRow('noon',      sealevel, openHorizon, date, hasElev, null);
+    fillRow('daylength', sealevel, openHorizon, date, hasElev, false);
+
+    // ── Dämmerung ─────────────────────────────────────────────────────────────
     const twilightRow = document.getElementById('twilight-row');
-    if (res.civilDawn !== null) {
-        setText('res-dawn', utcMinToLocalHHMM(res.civilDawn, date));
-        setText('res-dusk', utcMinToLocalHHMM(res.civilDusk, date));
+    if (sealevel.civilDawn !== null) {
+        setText('res-dawn-sl', utcMinToLocalHHMM(sealevel.civilDawn, date));
+        setText('res-dusk-sl', utcMinToLocalHHMM(sealevel.civilDusk, date));
+        if (hasElev && openHorizon.civilDawn !== null) {
+            setText('res-dawn-oh', utcMinToLocalHHMM(openHorizon.civilDawn, date));
+            setText('res-dusk-oh', utcMinToLocalHHMM(openHorizon.civilDusk, date));
+        }
+        setColVisible('cell-dawn-oh', hasElev);
+        setColVisible('cell-dusk-oh', hasElev);
         twilightRow.hidden = false;
     } else {
         twilightRow.hidden = true;
     }
 
-    drawTimeline(res, date);
+    drawTimeline(sealevel, date);
+}
+
+/**
+ * Befüllt eine Ergebniszeile für Meereshöhe und ggf. Höhenkorrektur.
+ * @param {string}  key       'sunrise' | 'sunset' | 'noon' | 'daylength'
+ * @param {object}  sl        sealevel-Ergebnis
+ * @param {object}  oh        openHorizon-Ergebnis
+ * @param {Date}    date
+ * @param {boolean} hasElev   Ob Höhe eingegeben wurde
+ * @param {boolean|null} lowerIsBetter  true = früherer Wert gut (Aufgang), false = später gut (Untergang), null = kein Pfeil
+ */
+function fillRow(key, sl, oh, date, hasElev, lowerIsBetter) {
+    const isDuration = key === 'daylength';
+
+    const slVal = isDuration
+        ? fmtDuration(sl.sunset - sl.sunrise)
+        : utcMinToLocalHHMM(sl[key === 'daylength' ? 'sunrise' : key], date);
+
+    setText(`res-${key}-sl`, slVal);
+
+    const cellId = `cell-${key}-oh`;
+    setColVisible(cellId, hasElev);
+
+    if (!hasElev) return;
+
+    const ohVal = isDuration
+        ? fmtDuration(oh.sunset - oh.sunrise)
+        : utcMinToLocalHHMM(oh[key === 'daylength' ? 'sunrise' : key], date);
+
+    setText(`res-${key}-oh`, ohVal);
+
+    // Differenz anzeigen
+    const diffEl = document.getElementById(`diff-${key}`);
+    if (!diffEl) return;
+
+    let diffMin;
+    if (isDuration) {
+        diffMin = (oh.sunset - oh.sunrise) - (sl.sunset - sl.sunrise);
+    } else {
+        diffMin = oh[key] - sl[key];
+    }
+
+    diffEl.textContent = fmtDiff(diffMin);
+    diffEl.className   = 'diff';
 }
 
 // ── Tageslicht-Balken ─────────────────────────────────────────────────────────
 function drawTimeline(res, date) {
-    const bar     = document.getElementById('timeline');
-    const nowLine = document.getElementById('now-line');
+    const nowLine  = document.getElementById('now-line');
     const nowLabel = document.getElementById('now-label');
+    const bar      = document.getElementById('timeline');
 
-    // Prozent des Tages (0–100)
-    const pct = m => `${((m / 1440) * 100).toFixed(2)}%`;
+    const pct  = m => `${((m / 1440) * 100).toFixed(2)}%`;
+    const dawn = res.civilDawn ?? res.sunrise;
+    const dusk = res.civilDusk ?? res.sunset;
 
-    const dawn   = res.civilDawn  ?? res.sunrise;
-    const dusk   = res.civilDusk  ?? res.sunset;
-    const rise   = res.sunrise;
-    const set    = res.sunset;
-
-    // Gradient: Nacht → Dämmerung → Tag → Dämmerung → Nacht
     bar.style.background = `linear-gradient(to right,
         #0f0e17 0%,
         #0f0e17 ${pct(dawn)},
-        #c07a3a ${pct(rise)},
+        #c07a3a ${pct(res.sunrise)},
         #f4d03f ${pct(res.solarNoon)},
-        #c07a3a ${pct(set)},
+        #c07a3a ${pct(res.sunset)},
         #0f0e17 ${pct(dusk)},
-        #0f0e17 100%
-    )`;
+        #0f0e17 100%)`;
 
-    // Aktuelle Uhrzeit als senkrechter Strich
-    const now = new Date();
+    const now    = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     const nowPct = ((nowMin / 1440) * 100).toFixed(2);
     nowLine.style.left  = `${nowPct}%`;
@@ -148,7 +205,12 @@ function drawTimeline(res, date) {
 
 // ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 function setText(id, text) {
-    document.getElementById(id).textContent = text;
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+function setColVisible(id, visible) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = !visible;
 }
 function showError(msg) {
     errorBox.textContent = msg;
@@ -158,8 +220,8 @@ function clearError() {
     errorBox.hidden = true;
 }
 function showPolarMsg(msg) {
-    polarMsg.textContent  = msg;
-    polarMsg.hidden       = false;
-    sunResults.hidden     = true;
+    polarMsg.textContent = msg;
+    polarMsg.hidden      = false;
+    sunResults.hidden    = true;
     document.getElementById('timeline-wrap').hidden = true;
 }
