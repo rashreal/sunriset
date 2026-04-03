@@ -7,7 +7,8 @@ const TILE_KEY       = 'sunriset-cached-tiles-v1';
 const FETCH_DELAY_MS = 40;   // ms zwischen Tile-Requests (Serverbelastung begrenzen)
 const TILE_LIMIT     = 1500; // Warnung wenn mehr als diese Anzahl zu laden wäre
 const SAVE_ZOOM_MIN  = 8;    // absolutes Minimum beim Speichern
-const SAVE_ZOOM_MAX  = 17;   // absolutes Maximum beim Speichern
+const SAVE_ZOOM_MAX     = 17; // Maximum für "Bereich speichern" (aktueller Zoom ±2)
+const SAVE_ALL_ZOOM_MAX = 15; // Maximum für "Alle Zoomstufen"
 
 // ── Gecachte Kacheln persistent verwalten ─────────────────────────────────────
 // Wir tracken in localStorage welche Kacheln (z/x/y) bereits geladen wurden,
@@ -167,7 +168,7 @@ async function saveAllZooms() {
     const btn      = document.getElementById('save-all-btn');
     const progress = document.getElementById('save-progress');
     const bounds   = map.getBounds();
-    const zMax     = SAVE_ZOOM_MAX; // immer bis zur maximalen Zoomstufe (15)
+    const zMax     = SAVE_ALL_ZOOM_MAX; // immer bis Zoom 15, unabhängig vom aktuellen Zoom
 
     const allTiles = [];
     for (let zoom = 1; zoom <= zMax; zoom++) {
