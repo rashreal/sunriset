@@ -188,7 +188,7 @@ async function saveAllZooms() {
     const btn      = document.getElementById('save-all-btn');
     const progress = document.getElementById('save-progress');
     const bounds   = map.getBounds();
-    const zMax     = Math.min(map.getZoom(), SAVE_ZOOM_MAX);
+    const zMax     = SAVE_ZOOM_MAX; // immer bis zur maximalen Zoomstufe (15)
 
     const allTiles = [];
     for (let zoom = 1; zoom <= zMax; zoom++) {
